@@ -10,6 +10,8 @@ def download_youtube_audio(url, destination="."):
     # Create a YouTube object
     yt = YouTube(url)
 
+    ssl._create_default_https_context = ssl._create_unverified_context
+
     # Check if the video is valid
     if not yt:
         raise Exception("Invalid video URL.")
@@ -18,7 +20,6 @@ def download_youtube_audio(url, destination="."):
     if yt.length > 10 * 60:
         raise Exception("Video is too long. Please provide a video that is less than 10 minutes long.")
 
-    ssl._create_default_https_context = ssl._create_unverified_context
     # Select the audio stream
     audio_stream = yt.streams.filter(only_audio=True).first()
 
