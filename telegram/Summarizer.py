@@ -4,6 +4,7 @@ import os
 import subprocess
 from openai import OpenAI
 import ssl
+import replicate
 from youtube_transcript_api import YouTubeTranscriptApi
 
 
@@ -97,6 +98,27 @@ def summarize_text(prompt):
                  'Aim to be detailed, particularly when addressing non-trivial aspects of the content. The summary ' \
                  'should ' \
                  'encompass at least 20-30% of the original text length.'
+    input = {
+        "prompt": prompt,
+        "prompt_template": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful assistant" + pre_prompt + "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+    }
+
+    output = replicate.run(
+        "meta/meta-llama-3-70b-instruct",
+        input=input
+    )
+    summary_result = "".join(output)
+    return summary_result
+
+def summarize_text_gpt(prompt):
+    pre_prompt = 'You are a model that receives a transcription of a YouTube video. Your task is to correct any words ' \
+                 'that ' \
+                 'may be incorrect based on the context, and transform it into a well-structured summary of the entire ' \
+                 'video. Your summary should highlight important details and provide additional context when ' \
+                 'necessary. ' \
+                 'Aim to be detailed, particularly when addressing non-trivial aspects of the content. The summary ' \
+                 'should ' \
+                 'encompass at least 20-30% of the original text length.'
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     response = client.chat.completions.create(
@@ -112,9 +134,9 @@ def summarize_text(prompt):
     return summary_result
 
 
-#def main():
+def main():
     print(process_subtitles("https://www.youtube.com/watch?v=P2CPd9ynFLg"))
 
 
-#if __name__ == "__main__":
+if __name__ == "__main__":
     main()
