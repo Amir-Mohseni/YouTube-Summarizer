@@ -54,9 +54,14 @@ def delete_file(file_path):
 
 
 def get_transcript(url):
-    # Get the transcript for the YouTube video
+    # Language code for English (United States)
+    language_code = "en-US"
+
     video_id = url.split("=")[1]
-    transcript = YouTubeTranscriptApi.get_transcript(video_id)
+
+    # Retrieve manually created transcript
+    transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=[language_code])
+    # Get the transcript for the YouTube video
     text = ""
     for line in transcript:
         text += line["text"] + " "
@@ -108,8 +113,8 @@ def summarize_text(prompt):
 
 
 #def main():
-#    print(process_subtitles("https://www.youtube.com/watch?v=reUZRyXxUs4"))
+    print(process_subtitles("https://www.youtube.com/watch?v=P2CPd9ynFLg"))
 
 
 #if __name__ == "__main__":
-#    main()
+    main()
