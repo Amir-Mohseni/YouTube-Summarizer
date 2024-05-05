@@ -7,7 +7,7 @@ from Summarizer import *
 def process_youtube_url(url):
     try:
         # Use the 'process' function from your summarizer module
-        summary = process(url)
+        summary = process_subtitles(url)
         return summary
     except Exception as e:
         # Handle any errors that may occur during processing

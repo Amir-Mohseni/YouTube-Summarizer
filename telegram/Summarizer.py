@@ -4,6 +4,7 @@ import os
 import subprocess
 from openai import OpenAI
 import ssl
+from youtube_transcript_api import YouTubeTranscriptApi
 
 
 def download_youtube_audio(url, destination="."):
@@ -37,7 +38,7 @@ def download_youtube_audio(url, destination="."):
 
 
 def transcribe_audio(audio_file):
-    model = whisper.load_model("tiny")
+    model = whisper.load_model("base")
     result = model.transcribe(audio_file)
     return result["text"]
 
@@ -52,14 +53,33 @@ def delete_file(file_path):
     os.remove(file_path)
 
 
-def process(url):
-    # Set the destination path for the download
+def get_transcript(url):
+    # Get the transcript for the YouTube video
+    video_id = url.split("=")[1]
+    transcript = YouTubeTranscriptApi.get_transcript(video_id)
+    text = ""
+    for line in transcript:
+        text += line["text"] + " "
+    return text
+
+
+def process_audio(url):
+    # Download the audio from the YouTube video
     file_path = download_youtube_audio(url)
 
+    # Transcribe the audio and delete the file
     prompt = transcribe_audio(file_path)
     delete_file(file_path)
+
+    # Summarize the text
     result_summary = summarize_text(prompt)
 
+    return result_summary
+
+
+def process_subtitles(url):
+    prompt = get_transcript(url)
+    result_summary = summarize_text(prompt)
     return result_summary
 
 
@@ -88,7 +108,7 @@ def summarize_text(prompt):
 
 
 #def main():
-#    print(process("https://www.youtube.com/watch?v=reUZRyXxUs4"))
+#    print(process_subtitles("https://www.youtube.com/watch?v=reUZRyXxUs4"))
 
 
 #if __name__ == "__main__":
