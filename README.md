@@ -27,6 +27,16 @@ Leverage `pytube`, `openai`, and `whisper` Python libraries to:
 
 6. **Review Summary:** Access the final summary in `summary.txt`.
 
+## Using the Code for Telegram Bot
+
+**To use the code for creating a Telegram bot that generates text summaries from YouTube URLs:**
+
+1.  Visit [YT\_SummaryBot](https://t.me/YT_SummaryBot) on Telegram.
+2.  Send the command `/summarize` to the bot.
+3.  The bot will ask you for the YouTube URL.
+4.  Reply to the bot with the YouTube URL.
+5.  The bot will provide you with the text summary.
+
 ## Acknowledgments
 
 - **pytube:** YouTube video downloads.
