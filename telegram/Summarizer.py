@@ -61,7 +61,7 @@ def get_transcript(url):
     video_id = url.split("=")[1]
 
     # Retrieve manually created transcript
-    transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=[language_code])
+    transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en", "en-US", "en-GB"])
     # Get the transcript for the YouTube video
     text = ""
     for line in transcript:
