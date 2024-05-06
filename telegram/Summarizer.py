@@ -1,3 +1,5 @@
+from time import sleep
+
 from pytube import YouTube
 import whisper
 import os
@@ -78,18 +80,18 @@ def process_audio(url):
     delete_file(file_path)
 
     # Summarize the text
-    result_summary = summarize_text(prompt)
+    result_summary = summarize_text_gpt(prompt)
 
     return result_summary
 
 
 def process_subtitles(url):
     prompt = get_transcript(url)
-    result_summary = summarize_text(prompt)
+    result_summary = summarize_text_gpt(prompt)
     return result_summary
 
 
-def summarize_text(prompt):
+def summarize_text_llama(prompt):
     pre_prompt = 'You are a model that receives a transcription of a YouTube video. Your task is to correct any words ' \
                  'that ' \
                  'may be incorrect based on the context, and transform it into a well-structured summary of the entire ' \
@@ -110,6 +112,7 @@ def summarize_text(prompt):
     summary_result = "".join(output)
     return summary_result
 
+
 def summarize_text_gpt(prompt):
     pre_prompt = 'You are a model that receives a transcription of a YouTube video. Your task is to correct any words ' \
                  'that ' \
@@ -122,7 +125,7 @@ def summarize_text_gpt(prompt):
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     response = client.chat.completions.create(
-        model="gpt-4-turbo",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": pre_prompt},
             {"role": "user", "content": prompt},
