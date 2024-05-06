@@ -14,7 +14,7 @@ Leverage `pytube`, `openai`, and `whisper` Python libraries to:
 
 1. **Set Up:** Install required libraries with pip:
     ```
-    pip install pytube openai git+https://github.com/openai/whisper.git
+    pip install -r requirements.txt
     ```
 
 2. **Get Started:** Clone the repository with the Jupyter Notebook.
@@ -29,7 +29,7 @@ Leverage `pytube`, `openai`, and `whisper` Python libraries to:
 
 ## Using the Code for Telegram Bot
 
-**To use the code for creating a Telegram bot that generates text summaries from YouTube URLs:**
+**To use the Telegram bot that generates text summaries from YouTube URLs:**
 
 1.  Visit [YT\_SummaryBot](https://t.me/YT_SummaryBot) on Telegram.
 2.  Send the command `/summarize` to the bot.
@@ -40,5 +40,4 @@ Leverage `pytube`, `openai`, and `whisper` Python libraries to:
 ## Acknowledgments
 
 - **pytube:** YouTube video downloads.
-- **OpenAI:** ChatGPT 4 model provision.
-- **Whisper:** Audio transcription.
+- **OpenAI:** ChatGPT models and Whisper for audio transcription.
