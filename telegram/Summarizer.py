@@ -1,5 +1,3 @@
-from time import sleep
-
 from pytube import YouTube
 import whisper
 import os
@@ -12,7 +10,10 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 def download_youtube_audio(url, destination="."):
     # Create a YouTube object
-    yt = YouTube(url)
+    try:
+        yt = YouTube(url)
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
     ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -60,10 +61,20 @@ def get_transcript(url):
     # Language code for English (United States)
     language_code = "en-US"
 
-    video_id = url.split("=")[1]
+    # Extract the video ID from the URL considering different formats
+    if "youtube.com" in url:
+        video_id = url.split("v=")[1]
+    elif "youtu.be" in url:
+        video_id = url.split("/")[-1]
+    else:
+        raise ValueError("Invalid YouTube URL. Please provide a valid YouTube video URL.")
 
     # Retrieve manually created transcript
-    transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en", "en-US", "en-GB"])
+    try:
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en", "en-US", "en-GB"])
+    except Exception as e: # If no manually created transcript is available, use the auto-generated one
+        return YouTube(url).captions.get_by_language_code(language_code).generate_srt_captions()
+
     # Get the transcript for the YouTube video
     text = ""
     for line in transcript:
@@ -121,7 +132,8 @@ def summarize_text_gpt(prompt):
                  'necessary. ' \
                  'Aim to be detailed, particularly when addressing non-trivial aspects of the content. The summary ' \
                  'should ' \
-                 'encompass at least 20-30% of the original text length.'
+                 'encompass at least 20-30% of the original text length.' \
+                 'You are supposed to translate the transcription into understandable and coherent english'
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     response = client.chat.completions.create(
