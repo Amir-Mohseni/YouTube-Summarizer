@@ -136,16 +136,29 @@ def summarize_text_gpt(prompt):
                  'You are supposed to translate the transcription into understandable and coherent english'
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": pre_prompt},
-            {"role": "user", "content": prompt},
-        ]
-    )
+    CHUNK_SIZE = 8000
+
+    # Split the prompt into chunks of 8000 tokens
+    prompt_chunks = [prompt[i:i + CHUNK_SIZE] for i in range(0, len(prompt), CHUNK_SIZE)]
+
+    # Generate completions for each chunk
+    completion_chunks = []
+    previous_chunk = ""
+
+    for chunk in prompt_chunks:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": pre_prompt},
+                {"role": "user", "content": "Here is some additional context from the previous chunk: " + previous_chunk},
+                {"role": "user", "content":  "Here is the current chunk: " + chunk},
+            ]
+        )
+        completion_chunks.append(response.choices[0].message.content)
+        previous_chunk = chunk
 
     # The 'response' will contain the completion from the model
-    summary_result = response.choices[0].message.content
+    summary_result = "".join(completion_chunks)
     return summary_result
 
 

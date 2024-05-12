@@ -21,6 +21,17 @@ def main():
     telegram_bot_token = os.getenv('TELEGRAM_BOT_TOKEN', 'YOUR_TELEGRAM_BOT_TOKEN')
     bot = telebot.TeleBot(telegram_bot_token)
 
+    # Define a welcome message
+    welcome_message = "Welcome to the YouTube Video Summarizer Bot! To get started, use the /summarize command."
+
+    # Define a command handler for the '/start' command
+    @bot.message_handler(commands=['start'])
+    def start(message):
+        bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown")
+
+    # Set a limit on the number of messages the bot can handle for each user to 5 requests per hour
+
+
     # Define a function to handle the user's input  (e.g., the YouTube URL)
     def url_handler(message):
         # Get the user's input
