@@ -30,7 +30,7 @@ def main():
         bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown")
 
     # Set button for the user to click to get start the bot, and one for the summarizer
-    @bot.message_handler(commands=['button'])
+    @bot.message_handler(commands=['/start'])
     def button(message):
         markup = telebot.types.ReplyKeyboardMarkup(row_width=2)
         itembtn1 = telebot.types.KeyboardButton('/start')
