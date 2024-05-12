@@ -29,7 +29,16 @@ def main():
     def start(message):
         bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown")
 
-    # Set a limit on the number of messages the bot can handle for each user to 5 requests per hour
+    # Set button for the user to click to get start the bot, and one for the summarizer
+    @bot.message_handler(commands=['button'])
+    def button(message):
+        markup = telebot.types.ReplyKeyboardMarkup(row_width=2)
+        itembtn1 = telebot.types.KeyboardButton('/start')
+        itembtn1.text = "Start"
+        itembtn2 = telebot.types.KeyboardButton('/summarize')
+        itembtn2.text = "Summarize"
+        markup.add(itembtn1, itembtn2)
+        bot.send_message(message.chat.id, "Choose a command:", reply_markup=markup)
 
 
     # Define a function to handle the user's input  (e.g., the YouTube URL)
