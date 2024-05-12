@@ -29,12 +29,18 @@ def main():
     def start(message):
         bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown")
 
+    # Define a command handler for the '/help' command
+    @bot.message_handler(commands=['help'])
+    def help(message):
+        help_text = "This bot can summarize the content of a YouTube video. To get started, use the /summarize command. You will be prompted to enter the URL of the YouTube video you would like to summarize. The bot will then process the video and provide you with a summary of its content. Enjoy!"
+        bot.send_message(message.chat.id, help_text, parse_mode="Markdown")
+
     # Set button for the user to click to get start the bot, and one for the summarizer
-    @bot.message_handler(commands=['/start'])
+    @bot.message_handler(commands=['start'])
     def button(message):
         markup = telebot.types.ReplyKeyboardMarkup(row_width=2)
-        itembtn1 = telebot.types.KeyboardButton('/start')
-        itembtn1.text = "Start"
+        itembtn1 = telebot.types.KeyboardButton('/help')
+        itembtn1.text = "Help"
         itembtn2 = telebot.types.KeyboardButton('/summarize')
         itembtn2.text = "Summarize"
         markup.add(itembtn1, itembtn2)
