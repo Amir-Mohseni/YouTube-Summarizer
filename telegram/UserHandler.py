@@ -22,30 +22,25 @@ def main():
     bot = telebot.TeleBot(telegram_bot_token)
 
     # Define a welcome message
-    welcome_message = "Welcome to the YouTube Video Summarizer Bot! To get started, use the /summarize command."
+    welcome_message = "Welcome to the YouTube Video Summarizer Bot!."
 
     # Define a command handler for the '/start' command
     @bot.message_handler(commands=['start'])
     def start(message):
-        bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown")
+        # Small row for the buttons
+        markup = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+        itembtn1 = telebot.types.KeyboardButton(text='/summarize')
+        itembtn2 = telebot.types.KeyboardButton(text='/help')
+        markup.add(itembtn1, itembtn2)
+        bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown", reply_markup=markup)
 
     # Define a command handler for the '/help' command
     @bot.message_handler(commands=['help'])
     def help(message):
-        help_text = "This bot can summarize the content of a YouTube video. To get started, use the /summarize command. You will be prompted to enter the URL of the YouTube video you would like to summarize. The bot will then process the video and provide you with a summary of its content. Enjoy!"
+        help_text = "This bot can summarize the content of a YouTube video.\nTo get started, use the /summarize " \
+                    "command. You will be prompted to enter the URL of the YouTube video you would like to summarize. " \
+                    "The bot will then process the video and provide you with a summary of its content.\nEnjoy!"
         bot.send_message(message.chat.id, help_text, parse_mode="Markdown")
-
-    # Set button for the user to click to get start the bot, and one for the summarizer
-    @bot.message_handler(commands=['start'])
-    def button(message):
-        markup = telebot.types.ReplyKeyboardMarkup(row_width=2)
-        itembtn1 = telebot.types.KeyboardButton('/help')
-        itembtn1.text = "Help"
-        itembtn2 = telebot.types.KeyboardButton('/summarize')
-        itembtn2.text = "Summarize"
-        markup.add(itembtn1, itembtn2)
-        bot.send_message(message.chat.id, "Choose a command:", reply_markup=markup)
-
 
     # Define a function to handle the user's input  (e.g., the YouTube URL)
     def url_handler(message):
