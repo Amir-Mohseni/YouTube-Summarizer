@@ -136,7 +136,7 @@ def summarize_text_gpt(prompt):
                  'You are supposed to translate the transcription into understandable and coherent english'
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-    CHUNK_SIZE = 8000
+    CHUNK_SIZE = 12000
 
     # Split the prompt into chunks of 8000 tokens
     prompt_chunks = [prompt[i:i + CHUNK_SIZE] for i in range(0, len(prompt), CHUNK_SIZE)]
