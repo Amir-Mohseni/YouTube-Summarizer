@@ -49,7 +49,11 @@ def main():
         print(f"Received YouTube URL: {url}")
 
         # Process the YouTube URL and generate a summary
-        summary = process_youtube_url(url)
+        try:
+            summary = process_youtube_url(url)
+        except Exception as e:
+            # Handle any errors that may occur during processing
+            summary = f"Error processing YouTube URL: {e}\nPlease try again."
 
         # Send the summary back to the user
         bot.send_message(message.chat.id, summary, parse_mode="Markdown")
