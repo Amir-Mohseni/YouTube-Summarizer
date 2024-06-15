@@ -3,7 +3,6 @@ import os
 import telebot
 from Summarizer import *
 
-
 # Define a function to process the YouTube URL and generate a summary
 def process_youtube_url(url):
     try:
@@ -14,6 +13,9 @@ def process_youtube_url(url):
         # Handle any errors that may occur during processing
         return f"Error processing YouTube URL: {e}"
 
+# Function to split a message into chunks
+def split_message(message, chunk_size=4000):
+    return [message[i:i+chunk_size] for i in range(0, len(message), chunk_size)]
 
 # Set up the Telegram Bot
 def main():
@@ -55,8 +57,12 @@ def main():
             # Handle any errors that may occur during processing
             summary = f"Error processing YouTube URL: {e}\nPlease try again."
 
-        # Send the summary back to the user
-        bot.send_message(message.chat.id, summary, parse_mode="Markdown")
+        # Split the summary if it's too long
+        summary_chunks = split_message(summary)
+
+        # Send the summary back to the user in chunks
+        for chunk in summary_chunks:
+            bot.send_message(message.chat.id, chunk, parse_mode="Markdown")
 
     @bot.message_handler(commands=['summarize'])
     def message_handler(message):
@@ -66,7 +72,6 @@ def main():
 
     # Start the bot
     bot.infinity_polling()
-
 
 # Entry point of the script
 if __name__ == '__main__':
