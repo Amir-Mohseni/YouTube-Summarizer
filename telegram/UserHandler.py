@@ -1,79 +1,55 @@
-from dotenv import load_dotenv
 import os
 import telebot
-from Summarizer import *
+from dotenv import load_dotenv
+from Summarizer import process_youtube_url, split_message
 
-# Define a function to process the YouTube URL and generate a summary
-def process_youtube_url(url):
-    try:
-        # Use the 'process' function from your summarizer module
-        summary = process_subtitles(url)
-        return summary
-    except Exception as e:
-        # Handle any errors that may occur during processing
-        return f"Error processing YouTube URL: {e}"
-
-# Function to split a message into chunks
-def split_message(message, chunk_size=4000):
-    return [message[i:i+chunk_size] for i in range(0, len(message), chunk_size)]
-
-# Set up the Telegram Bot
 def main():
-    # Retrieve the Telegram bot token from environment variables
-    telegram_bot_token = os.getenv('TELEGRAM_BOT_TOKEN', 'YOUR_TELEGRAM_BOT_TOKEN')
-    bot = telebot.TeleBot(telegram_bot_token)
+    try:
+        load_dotenv()
+        telegram_bot_token = os.getenv('TELEGRAM_BOT_TOKEN', 'YOUR_TELEGRAM_BOT_TOKEN')
+        bot = telebot.TeleBot(telegram_bot_token)
 
-    # Define a welcome message
-    welcome_message = "Welcome to the YouTube Video Summarizer Bot!."
+        welcome_message = "Welcome to the YouTube Video Summarizer Bot!."
 
-    # Define a command handler for the '/start' command
-    @bot.message_handler(commands=['start'])
-    def start(message):
-        # Small row for the buttons
-        markup = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-        itembtn1 = telebot.types.KeyboardButton(text='/summarize')
-        itembtn2 = telebot.types.KeyboardButton(text='/help')
-        markup.add(itembtn1, itembtn2)
-        bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown", reply_markup=markup)
+        @bot.message_handler(commands=['start'])
+        def start(message):
+            markup = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+            itembtn1 = telebot.types.KeyboardButton(text='/summarize')
+            itembtn2 = telebot.types.KeyboardButton(text='/help')
+            markup.add(itembtn1, itembtn2)
+            bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown", reply_markup=markup)
 
-    # Define a command handler for the '/help' command
-    @bot.message_handler(commands=['help'])
-    def help(message):
-        help_text = "This bot can summarize the content of a YouTube video.\nTo get started, use the /summarize " \
-                    "command. You will be prompted to enter the URL of the YouTube video you would like to summarize. " \
-                    "The bot will then process the video and provide you with a summary of its content.\nEnjoy!"
-        bot.send_message(message.chat.id, help_text, parse_mode="Markdown")
+        @bot.message_handler(commands=['help'])
+        def help(message):
+            help_text = "This bot can summarize the content of a YouTube video.\nTo get started, use the /summarize " \
+                        "command. You will be prompted to enter the URL of the YouTube video you would like to summarize. " \
+                        "The bot will then process the video and provide you with a summary of its content.\nEnjoy!"
+            bot.send_message(message.chat.id, help_text, parse_mode="Markdown")
 
-    # Define a function to handle the user's input  (e.g., the YouTube URL)
-    def url_handler(message):
-        # Get the user's input
-        url = message.text
-        print(f"Received YouTube URL: {url}")
+        def url_handler(message):
+            url = message.text
+            print(f"Received YouTube URL: {url}")
 
-        # Process the YouTube URL and generate a summary
-        try:
-            summary = process_youtube_url(url)
-        except Exception as e:
-            # Handle any errors that may occur during processing
-            summary = f"Error processing YouTube URL: {e}\nPlease try again."
+            try:
+                summary = process_youtube_url(url)
+            except Exception as e:
+                summary = f"Error processing YouTube URL: {e}\nPlease try again."
 
-        # Split the summary if it's too long
-        summary_chunks = split_message(summary)
+            summary_chunks = split_message(summary)
 
-        # Send the summary back to the user in chunks
-        for chunk in summary_chunks:
-            bot.send_message(message.chat.id, chunk, parse_mode="Markdown")
+            for chunk in summary_chunks:
+                bot.send_message(message.chat.id, chunk, parse_mode="Markdown")
 
-    @bot.message_handler(commands=['summarize'])
-    def message_handler(message):
-        text = "Please enter the URL of the YouTube video you would like to summarize."
-        sent_msg = bot.send_message(message.chat.id, text, parse_mode="Markdown")
-        bot.register_next_step_handler(sent_msg, url_handler)
+        @bot.message_handler(commands=['summarize'])
+        def message_handler(message):
+            text = "Please enter the URL of the YouTube video you would like to summarize."
+            sent_msg = bot.send_message(message.chat.id, text, parse_mode="Markdown")
+            bot.register_next_step_handler(sent_msg, url_handler)
 
-    # Start the bot
-    bot.infinity_polling()
+        bot.infinity_polling()
 
-# Entry point of the script
+    except Exception as e:
+        print(f"Error in main function: {e}")
+
 if __name__ == '__main__':
-    load_dotenv()
     main()
