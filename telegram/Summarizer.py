@@ -2,7 +2,7 @@ from pytube import YouTube
 import os
 import subprocess
 from youtube_transcript_api import YouTubeTranscriptApi
-from openai import OpenAI, Error
+from openai import OpenAI
 
 def download_youtube_audio(url, destination="."):
     try:
@@ -79,7 +79,7 @@ def summarize_text_gpt(prompt):
                 ]
             )
             return response.choices[0].message.content
-        except Error as e:
+        except Exception as e:
             raise RuntimeError(f"OpenAI API error: {e}")
 
     prompt_chunks = [prompt[i:i + CHUNK_SIZE] for i in range(0, len(prompt), CHUNK_SIZE)]
