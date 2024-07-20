@@ -2,7 +2,7 @@ from pytube import YouTube
 import os
 import subprocess
 from youtube_transcript_api import YouTubeTranscriptApi
-import openai
+from openai import OpenAI
 
 def download_youtube_audio(url, destination="."):
     try:
@@ -64,17 +64,17 @@ def get_transcript(url):
 
 def summarize_text_gpt(prompt):
     pre_prompt = 'You are a model that receives a transcription of a YouTube video. Your task is to correct any words that may be incorrect based on the context, and transform it into a well-structured summary of the entire video. Your summary should highlight important details and provide additional context when necessary. Aim to be detailed, particularly when addressing non-trivial aspects of the content. The summary should encompass at least 20-30% of the original text length.'
-    client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+    client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     try:
-        response = client.chat_completions.create(
+        response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": pre_prompt},
                 {"role": "user", "content": prompt},
             ]
         )
-        return response.choices[0].message.content
+        return response.choices[0].message["content"]
     except Exception as e:
         raise RuntimeError(f"OpenAI API error: {e}")
 
@@ -95,6 +95,9 @@ if __name__ == '__main__':
     
     # Example URL for testing
     test_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
+    # Set up the API key
+    os.environ['OPENAI_API_KEY'] = 'your_openai_api_key'  # Replace with your actual OpenAI API key
 
     # Test the process_youtube_url function
     try:
