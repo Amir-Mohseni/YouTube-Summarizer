@@ -35,10 +35,8 @@ def main():
             except Exception as e:
                 summary = f"Error processing YouTube URL: {e}\nPlease try again."
 
-            summary_chunks = split_message(summary)
-
-            for chunk in summary_chunks:
-                bot.send_message(message.chat.id, chunk, parse_mode="Markdown")
+            # Sending the summary back to the user
+            bot.send_message(message.chat.id, summary, parse_mode="Markdown")
 
         @bot.message_handler(commands=['summarize'])
         def message_handler(message):
