@@ -101,9 +101,6 @@ if __name__ == '__main__':
     # Example URL for testing
     test_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
-    # Set up the API key
-    os.environ['OPENAI_API_KEY'] = 'your_openai_api_key'  # Replace with your actual OpenAI API key
-
     # Test the process_youtube_url function
     try:
         summary = process_youtube_url(test_url)
