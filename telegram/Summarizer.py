@@ -74,7 +74,7 @@ def summarize_text_gpt(prompt):
                 {"role": "user", "content": prompt},
             ]
         )
-        return response.choices[0].message["content"]
+        return response.choices[0].message.content
     except Exception as e:
         raise RuntimeError(f"OpenAI API error: {e}")
 
