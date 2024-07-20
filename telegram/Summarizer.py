@@ -68,7 +68,7 @@ def summarize_text_gpt(prompt):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": pre_prompt},
                 {"role": "user", "content": prompt},
