@@ -3,6 +3,13 @@ import telebot
 from dotenv import load_dotenv
 from Summarizer import process_youtube_url
 
+def escape_markdown_v2(text):
+    """
+    Helper function to escape characters for Telegram MarkdownV2.
+    """
+    escape_chars = r'_*[]()~`>#+-=|{}.!'
+    return ''.join(['\\' + char if char in escape_chars else char for char in text])
+
 def main():
     try:
         load_dotenv()
@@ -17,7 +24,7 @@ def main():
             itembtn1 = telebot.types.KeyboardButton(text='/summarize')
             itembtn2 = telebot.types.KeyboardButton(text='/help')
             markup.add(itembtn1, itembtn2)
-            bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown", reply_markup=markup)
+            bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown")
 
         @bot.message_handler(commands=['help'])
         def help(message):
@@ -32,11 +39,11 @@ def main():
 
             try:
                 summary = process_youtube_url(url)
+                summary = escape_markdown_v2(summary)  # Escape special characters for MarkdownV2
             except Exception as e:
                 summary = f"Error processing YouTube URL: {e}\nPlease try again."
 
-            # Sending the summary back to the user
-            bot.send_message(message.chat.id, summary, parse_mode="Markdown")
+            bot.send_message(message.chat.id, summary, parse_mode="MarkdownV2")
 
         @bot.message_handler(commands=['summarize'])
         def message_handler(message):
