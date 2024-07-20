@@ -67,7 +67,7 @@ def summarize_text_gpt(prompt):
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     try:
-        response = client.chat.completions.create(
+        response = client.chat_completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": pre_prompt},
@@ -95,9 +95,6 @@ if __name__ == '__main__':
     
     # Example URL for testing
     test_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-
-    # Set up the API key
-    os.environ['OPENAI_API_KEY'] = 'your_openai_api_key'  # Replace with your actual OpenAI API key
 
     # Test the process_youtube_url function
     try:
