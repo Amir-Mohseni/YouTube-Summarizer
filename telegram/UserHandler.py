@@ -1,7 +1,7 @@
 import os
 import telebot
 from dotenv import load_dotenv
-from Summarizer import process_youtube_url, split_message
+from Summarizer import process_youtube_url
 
 def main():
     try:
