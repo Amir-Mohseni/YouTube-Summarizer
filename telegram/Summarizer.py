@@ -66,12 +66,10 @@ def summarize_text_gpt(prompt):
     pre_prompt = 'You are a model that receives a transcription of a YouTube video. Your task is to correct any words that may be incorrect based on the context, and transform it into a well-structured summary of the entire video. Your summary should highlight important details and provide additional context when necessary. Aim to be detailed, particularly when addressing non-trivial aspects of the content. The summary should encompass at least 20-30% of the original text length.'
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-    CHUNK_SIZE = 12000
-
     def generate_completion(chunk, previous_chunk):
         try:
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+            response = client.chat_completions.create(
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": pre_prompt},
                     {"role": "user", "content": f"Here is some additional context from the previous chunk: {previous_chunk}"},
@@ -82,17 +80,8 @@ def summarize_text_gpt(prompt):
         except Exception as e:
             raise RuntimeError(f"OpenAI API error: {e}")
 
-    prompt_chunks = [prompt[i:i + CHUNK_SIZE] for i in range(0, len(prompt), CHUNK_SIZE)]
-    completion_chunks = []
-    previous_chunk = ""
-
-    for chunk in prompt_chunks:
-        completion = generate_completion(chunk, previous_chunk)
-        completion_chunks.append(completion)
-        previous_chunk = chunk
-
-    summary_result = "".join(completion_chunks)
-    return summary_result
+    completion = generate_completion(prompt, "")
+    return completion
 
 def process_subtitles(url):
     prompt = get_transcript(url)
@@ -105,9 +94,6 @@ def process_youtube_url(url):
         return summary
     except Exception as e:
         return f"Error processing YouTube URL: {e}"
-
-def split_message(message, chunk_size=4000):
-    return [message[i:i+chunk_size] for i in range(0, len(message), chunk_size)]
 
 if __name__ == '__main__':
     print("This file contains functions for YouTube video summarization.")
