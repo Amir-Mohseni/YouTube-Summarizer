@@ -2,6 +2,7 @@ import os
 import telebot
 from dotenv import load_dotenv
 from Summarizer import process_youtube_url
+import openai
 
 def escape_markdown_v2(text):
     """
