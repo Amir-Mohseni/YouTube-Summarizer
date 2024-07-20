@@ -67,7 +67,7 @@ def summarize_text_gpt(prompt):
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     try:
-        response = client.chat_completions.create(
+        response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": pre_prompt},
