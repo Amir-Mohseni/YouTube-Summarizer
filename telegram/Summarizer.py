@@ -38,7 +38,7 @@ def download_youtube_audio(url, destination="."):
 def get_transcript(url):
     # Extract the video ID from the URL considering different formats
     if "youtube.com" in url:
-        video_id = url.split("v=")[1]
+        video_id = url.split("v=")[1].split("&")[0]
     elif "youtu.be" in url:
         video_id = url.split("/")[-1]
     else:
@@ -64,24 +64,19 @@ def get_transcript(url):
 
 def summarize_text_gpt(prompt):
     pre_prompt = 'You are a model that receives a transcription of a YouTube video. Your task is to correct any words that may be incorrect based on the context, and transform it into a well-structured summary of the entire video. Your summary should highlight important details and provide additional context when necessary. Aim to be detailed, particularly when addressing non-trivial aspects of the content. The summary should encompass at least 20-30% of the original text length.'
-    openai.api_key = os.getenv('OPENAI_API_KEY')
+    client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-    def generate_completion(chunk, previous_chunk):
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": pre_prompt},
-                    {"role": "user", "content": f"Here is some additional context from the previous chunk: {previous_chunk}"},
-                    {"role": "user", "content":  f"Here is the current chunk: {chunk}"},
-                ]
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            raise RuntimeError(f"OpenAI API error: {e}")
-
-    completion = generate_completion(prompt, "")
-    return completion
+    try:
+        response = client.chat_completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": pre_prompt},
+                {"role": "user", "content": prompt},
+            ]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        raise RuntimeError(f"OpenAI API error: {e}")
 
 def process_subtitles(url):
     prompt = get_transcript(url)
