@@ -1,7 +1,4 @@
-openai-whisper
-youtube_transcript_api~=0.6.2
-pytube~=15.0.0
-openai~=1.25.1
-telebot~=0.0.5
-replicate
+youtube_transcript_api
+openai
+telebot
 python-dotenv
