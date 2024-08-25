@@ -1,7 +1,7 @@
 import os
 import telebot
 from dotenv import load_dotenv
-from Summarizer import process_youtube_url
+from Summarizer import summarize_yt_video
 import openai
 
 def escape_markdown_v2(text):
@@ -39,7 +39,7 @@ def main():
             print(f"Received YouTube URL: {url}")
 
             try:
-                summary = process_youtube_url(url)
+                summary = summarize_yt_video(url)
                 summary = escape_markdown_v2(summary)  # Escape special characters for MarkdownV2
             except Exception as e:
                 summary = f"Error processing YouTube URL: {e}\nPlease try again."
