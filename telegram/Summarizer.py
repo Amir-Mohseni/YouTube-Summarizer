@@ -4,7 +4,7 @@ from openai import OpenAI
 
 
 def get_youtube_transcript(url):
-    # Extract the video ID from the URL considering different formats
+    print("Extracting video ID...")
     if "youtube.com" in url:
         video_id = url.split("v=")[1].split("&")[0]
     elif "youtu.be" in url:
@@ -12,14 +12,25 @@ def get_youtube_transcript(url):
     else:
         raise ValueError("Invalid YouTube URL. Please provide a valid YouTube video URL.")
 
-    try:
-        # Attempt to get the manually created transcript first
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
-    except (TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable):
-        # If manual transcript is not available, get the auto-generated one
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'], preserve_formatting=True)
+    print(f"Video ID extracted: {video_id}")
 
-    # Convert transcript to a string
+    try:
+        print("Fetching manually created transcript...")
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+        print("Manually created transcript found.")
+    except (TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable) as e:
+        print(f"Manual transcript not found: {e}")
+        print("Attempting to fetch auto-generated transcript...")
+        try:
+            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'], preserve_formatting=True)
+            print("Auto-generated transcript found.")
+        except Exception as inner_e:
+            print(f"Failed to fetch auto-generated transcript: {inner_e}")
+            return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+
     transcript_str = '\n'.join([item['text'] for item in transcript])
     return transcript_str
 
