@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable
 from openai import OpenAI
-
+from pytube import YouTube
 
 def get_youtube_transcript(url):
     print("Extracting video ID...")
@@ -27,13 +27,34 @@ def get_youtube_transcript(url):
             print("Auto-generated transcript found.")
         except Exception as inner_e:
             print(f"Failed to fetch auto-generated transcript: {inner_e}")
-            return None
+            print("Attempting to fetch captions using pytube...")
+            transcript_str = fetch_captions_with_pytube(url)
+            if transcript_str:
+                print("Captions fetched using pytube.")
+                return transcript_str
+            else:
+                print("No captions found using pytube.")
+                return None
     except Exception as e:
         print(f"Unexpected error: {e}")
         return None
 
     transcript_str = '\n'.join([item['text'] for item in transcript])
     return transcript_str
+
+def fetch_captions_with_pytube(url):
+    try:
+        yt = YouTube(url)
+        # Attempt to fetch English captions
+        captions = yt.captions.get_by_language_code('en')
+        if captions:
+            return captions.generate_srt_captions()
+        else:
+            print("No English captions available.")
+            return None
+    except Exception as e:
+        print(f"Failed to fetch captions with pytube: {e}")
+        return None
 
 
 def summarize_text_gpt(transcript, max_tokens=128):
