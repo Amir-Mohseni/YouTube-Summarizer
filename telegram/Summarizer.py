@@ -4,37 +4,6 @@ import subprocess
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable
 from openai import OpenAI
 
-def download_youtube_audio(url, destination="."):
-    try:
-        yt = YouTube(url)
-    except Exception as e:
-        raise ValueError(f"Failed to initialize YouTube object for URL {url}: {e}")
-
-    # Check video length
-    if yt.length > 10 * 60:
-        raise ValueError("Video is too long. Please provide a video that is less than 10 minutes long.")
-
-    # Select the audio stream
-    audio_stream = yt.streams.filter(only_audio=True).first()
-    if not audio_stream:
-        raise ValueError("No audio stream available for this video.")
-
-    # Download the audio stream
-    out_file = audio_stream.download(output_path=destination)
-
-    # Convert file to mp3 using ffmpeg
-    audio_file = os.path.splitext(out_file)[0] + '.mp3'
-    try:
-        subprocess.run(['ffmpeg', '-i', out_file, audio_file], check=True)
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"ffmpeg error: {e}")
-
-    # Remove the original file
-    os.remove(out_file)
-
-    print(f"Downloaded and converted to MP3: {audio_file}")
-    return audio_file
-
 def get_youtube_transcript(url):
    # Extract the video ID from the URL considering different formats
     if "youtube.com" in url:
@@ -55,21 +24,23 @@ def get_youtube_transcript(url):
     transcript_str = '\n'.join([item['text'] for item in transcript])
     return transcript_str
 
-def summarize_text_gpt(prompt):
-    pre_prompt = 'You are a model that receives a YouTube video transcription. Your task is to correct any words that may be incorrect based on the context, and transform it into a well-structured summary of the entire video. Your summary should highlight important details and provide additional context when necessary. Aim to be detailed, particularly when addressing non-trivial aspects of the content. The summary should encompass at least 20-30% of the original text length.'
-    client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+def summarize_text_gpt(transcript):
+    system_msg = 'You are a model that receives a transcription of a YouTube video. Your task is to correct any words that may be incorrect based on the context, and transform it into a well-structured summary of the entire video. Your summary should highlight important details and provide additional context when necessary. Aim to be detailed, particularly when addressing non-trivial aspects of the content. The summary should encompass at least 20-30% of the original text length.'
+    client = OpenAI(api_key=userdata.get('OPENAI_API_KEY'))
+    token_limit = max(len(transcript) // 2, 4096)
 
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": pre_prompt},
-                {"role": "user", "content": prompt},
-            ]
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": transcript},
+            ],
+            max_tokens=token_limit,
         )
         return response.choices[0].message.content
     except Exception as e:
-        raise RuntimeError(f"OpenAI API error: {e}")
+        raise RuntimeError(f"Encountered error when summarizing the transcript")
 
 def summarize_yt_video(url):
     try:
