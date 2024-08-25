@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable
 from openai import OpenAI
 
@@ -41,6 +42,7 @@ def summarize_text_gpt(transcript, max_tokens=128):
                  'entire video. Your summary should highlight important details and provide additional context when ' \
                  'necessary. Aim to be detailed, particularly when addressing non-trivial aspects of the content. The ' \
                  'summary should encompass at least 20-30% of the original text length.'
+    load_dotenv()
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     max_tokens = min(max_tokens, len(transcript))
