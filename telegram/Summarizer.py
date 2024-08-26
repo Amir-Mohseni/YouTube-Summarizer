@@ -4,6 +4,7 @@ from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, No
 from openai import OpenAI
 from pytube import YouTube
 
+
 def get_youtube_transcript(url):
     print("Extracting video ID...")
     if "youtube.com" in url:
@@ -42,6 +43,7 @@ def get_youtube_transcript(url):
     transcript_str = '\n'.join([item['text'] for item in transcript])
     return transcript_str
 
+
 def fetch_captions_with_pytube(url):
     try:
         yt = YouTube(url)
@@ -55,6 +57,34 @@ def fetch_captions_with_pytube(url):
     except Exception as e:
         print(f"Failed to fetch captions with pytube: {e}")
         return None
+
+
+def get_transcript(url):
+    # Extract the video ID from the URL considering different formats
+    if "youtube.com" in url:
+        video_id = url.split("v=")[1].split("&")[0]
+    elif "youtu.be" in url:
+        video_id = url.split("/")[-1]
+    else:
+        raise ValueError("Invalid YouTube URL. Please provide a valid YouTube video URL.")
+
+    # Retrieve manually created transcript
+    try:
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en", "en-US", "en-GB"])
+    except Exception as e:
+        print(f"Error retrieving manual transcript: {e}")
+        # If no manually created transcript is available, use the auto-generated one
+        try:
+            yt = YouTube(url)
+            return yt.captions.get_by_language_code("en").generate_srt_captions()
+        except Exception as e:
+            raise RuntimeError(f"Error retrieving auto-generated transcript: {e}")
+
+    # Get the transcript for the YouTube video
+    text = ""
+    for line in transcript:
+        text += line["text"] + " "
+    return text
 
 
 def summarize_text_gpt(transcript, max_tokens=128):
@@ -84,7 +114,8 @@ def summarize_text_gpt(transcript, max_tokens=128):
 
 def summarize_yt_video(url, summary_type='medium'):
     try:
-        transcript = get_youtube_transcript(url)
+        #        transcript = get_youtube_transcript(url)
+        transcript = get_transcript(url)
         length_dict = {'short': 128, 'medium': 256, 'long': 512, 'extra_long': 2048}
         max_tokens = length_dict[summary_type]
 
