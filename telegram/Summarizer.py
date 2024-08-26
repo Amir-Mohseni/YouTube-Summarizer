@@ -76,7 +76,7 @@ def get_transcript(url):
         # If no manually created transcript is available, use the auto-generated one
         try:
             yt = YouTube(url)
-            return yt.captions.get_by_language_code("en").generate_srt_captions()
+            return yt.captions.get_by_language_code("a.en").generate_srt_captions()
         except Exception as e:
             raise RuntimeError(f"Error retrieving auto-generated transcript: {e}")
 
