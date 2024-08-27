@@ -5,6 +5,9 @@ from openai import OpenAI
 from pytube import YouTube
 
 
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable
+from pytube import YouTube
+
 def get_youtube_transcript(url):
     print("Extracting video ID...")
     if "youtube.com" in url:
@@ -16,15 +19,16 @@ def get_youtube_transcript(url):
 
     print(f"Video ID extracted: {video_id}")
 
+    transcript = None
     try:
         print("Fetching manually created transcript...")
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en", "en-US", "en-GB"])
         print("Manually created transcript found.")
     except (TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable) as e:
         print(f"Manual transcript not found: {e}")
         print("Attempting to fetch auto-generated transcript...")
         try:
-            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'], preserve_formatting=True)
+            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en"], preserve_formatting=True)
             print("Auto-generated transcript found.")
         except Exception as inner_e:
             print(f"Failed to fetch auto-generated transcript: {inner_e}")
@@ -40,15 +44,21 @@ def get_youtube_transcript(url):
         print(f"Unexpected error: {e}")
         return None
 
-    transcript_str = '\n'.join([item['text'] for item in transcript])
-    return transcript_str
+    if transcript:
+        transcript_str = ' '.join([item['text'] for item in transcript])
+        return transcript_str
 
+    return None
 
 def fetch_captions_with_pytube(url):
     try:
         yt = YouTube(url)
         # Attempt to fetch English captions
         captions = yt.captions.get_by_language_code('en')
+        if not captions:
+            # Try fetching auto-generated English captions
+            captions = yt.captions.get_by_language_code("a.en")
+        
         if captions:
             return captions.generate_srt_captions()
         else:
@@ -57,35 +67,6 @@ def fetch_captions_with_pytube(url):
     except Exception as e:
         print(f"Failed to fetch captions with pytube: {e}")
         return None
-
-
-def get_transcript(url):
-    # Extract the video ID from the URL considering different formats
-    if "youtube.com" in url:
-        video_id = url.split("v=")[1].split("&")[0]
-    elif "youtu.be" in url:
-        video_id = url.split("/")[-1]
-    else:
-        raise ValueError("Invalid YouTube URL. Please provide a valid YouTube video URL.")
-
-    # Retrieve manually created transcript
-    try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en", "en-US", "en-GB"])
-    except Exception as e:
-        print(f"Error retrieving manual transcript: {e}")
-        # If no manually created transcript is available, use the auto-generated one
-        try:
-            yt = YouTube(url)
-            return yt.captions.get_by_language_code("a.en").generate_srt_captions()
-        except Exception as e:
-            raise RuntimeError(f"Error retrieving auto-generated transcript: {e}")
-
-    # Get the transcript for the YouTube video
-    text = ""
-    for line in transcript:
-        text += line["text"] + " "
-    return text
-
 
 def summarize_text_gpt(transcript, max_tokens=128):
     system_msg = 'You are a model that receives a transcription of a YouTube video. Your task is to correct any words ' \
