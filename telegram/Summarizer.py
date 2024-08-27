@@ -95,8 +95,7 @@ def summarize_text_gpt(transcript, max_tokens=128):
 
 def summarize_yt_video(url, summary_type='medium'):
     try:
-        #        transcript = get_youtube_transcript(url)
-        transcript = get_transcript(url)
+        transcript = get_youtube_transcript(url)
         length_dict = {'short': 128, 'medium': 256, 'long': 512, 'extra_long': 2048}
         max_tokens = length_dict[summary_type]
 
