@@ -3,10 +3,8 @@ from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable
 from openai import OpenAI
 from pytube import YouTube
+import socks
 
-
-from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable
-from pytube import YouTube
 
 def get_youtube_transcript(url):
     print("Extracting video ID...")
@@ -19,10 +17,26 @@ def get_youtube_transcript(url):
 
     print(f"Video ID extracted: {video_id}")
 
+    # Load environment variables from the .env file
+    load_dotenv()
+
+    # Retrieve proxy credentials from environment variables
+    proxy_user = os.getenv('PROXY_USER')
+    proxy_pass = os.getenv('PROXY_PASS')
+    proxy_ip = os.getenv('PROXY_IP')
+    proxy_port = os.getenv('PROXY_PORT')
+
+    # Set up the proxies dictionary
+    proxies = {
+        'http': f'socks5://{proxy_user}:{proxy_pass}@{proxy_ip}:{proxy_port}',
+        'https': f'socks5://{proxy_user}:{proxy_pass}@{proxy_ip}:{proxy_port}'
+    }
+
+
     transcript = None
     try:
         print("Fetching manually created transcript...")
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en", "en-US", "en-GB"])
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en", "en-US", "en-GB"], proxies=proxies)
         print("Manually created transcript found.")
     except (TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable) as e:
         print(f"Manual transcript not found: {e}")
@@ -32,14 +46,7 @@ def get_youtube_transcript(url):
             print("Auto-generated transcript found.")
         except Exception as inner_e:
             print(f"Failed to fetch auto-generated transcript: {inner_e}")
-            print("Attempting to fetch captions using pytube...")
-            transcript_str = fetch_captions_with_pytube(url)
-            if transcript_str:
-                print("Captions fetched using pytube.")
-                return transcript_str
-            else:
-                print("No captions found using pytube.")
-                return None
+            return None
     except Exception as e:
         print(f"Unexpected error: {e}")
         return None
@@ -50,23 +57,6 @@ def get_youtube_transcript(url):
 
     return None
 
-def fetch_captions_with_pytube(url):
-    try:
-        yt = YouTube(url)
-        # Attempt to fetch English captions
-        captions = yt.captions.get_by_language_code('en')
-        if not captions:
-            # Try fetching auto-generated English captions
-            captions = yt.captions.get_by_language_code("a.en")
-        
-        if captions:
-            return captions.generate_srt_captions()
-        else:
-            print("No English captions available.")
-            return None
-    except Exception as e:
-        print(f"Failed to fetch captions with pytube: {e}")
-        return None
 
 def summarize_text_gpt(transcript, max_tokens=128):
     system_msg = 'You are a model that receives a transcription of a YouTube video. Your task is to correct any words ' \
