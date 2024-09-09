@@ -3,3 +3,5 @@ openai
 telebot
 python-dotenv
 pytube
+langdetect
+requests[socks]
