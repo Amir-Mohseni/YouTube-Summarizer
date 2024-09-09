@@ -3,3 +3,4 @@ openai
 telebot
 python-dotenv
 pytube
+requests[socks]
