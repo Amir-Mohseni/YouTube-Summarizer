@@ -32,7 +32,6 @@ def get_youtube_transcript(url):
         'https': f'socks5://{proxy_user}:{proxy_pass}@{proxy_ip}:{proxy_port}'
     }
 
-
     transcript = None
     try:
         print("Fetching manually created transcript...")
@@ -44,18 +43,36 @@ def get_youtube_transcript(url):
         try:
             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en"], proxies=proxies, preserve_formatting=True)
             print("Auto-generated transcript found.")
-        except Exception as inner_e:
+        except (TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable) as inner_e:
             print(f"Failed to fetch auto-generated transcript: {inner_e}")
-            return None
+            return {
+                "error": True,
+                "message": "Subtitles are disabled or not available for this video."
+            }
+        except Exception as inner_e:
+            print(f"Unexpected error during fetching auto-generated transcript: {inner_e}")
+            return {
+                "error": True,
+                "message": "An unexpected error occurred while fetching the auto-generated transcript."
+            }
     except Exception as e:
         print(f"Unexpected error: {e}")
-        return None
+        return {
+            "error": True,
+            "message": "An unexpected error occurred."
+        }
 
     if transcript:
         transcript_str = ' '.join([item['text'] for item in transcript])
-        return transcript_str
+        return {
+            "error": False,
+            "transcript": transcript_str
+        }
 
-    return None
+    return {
+        "error": True,
+        "message": "Transcript could not be retrieved."
+    }
 
 
 def summarize_text_gpt(transcript, max_tokens=128):
@@ -84,7 +101,11 @@ def summarize_text_gpt(transcript, max_tokens=128):
 
 def summarize_yt_video(url, summary_type='medium'):
     try:
-        transcript = get_youtube_transcript(url)
+        transcript_data = get_youtube_transcript(url)
+        if transcript_data['error']:
+            return transcript_data['message']
+        
+        transcript = transcript_data['transcript']
         length_dict = {'short': 128, 'medium': 256, 'long': 512, 'extra_long': 2048}
         max_tokens = length_dict[summary_type]
 
