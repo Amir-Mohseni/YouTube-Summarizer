@@ -42,7 +42,7 @@ def get_youtube_transcript(url):
         print(f"Manual transcript not found: {e}")
         print("Attempting to fetch auto-generated transcript...")
         try:
-            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en"], preserve_formatting=True)
+            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en"], proxies=proxies, preserve_formatting=True)
             print("Auto-generated transcript found.")
         except Exception as inner_e:
             print(f"Failed to fetch auto-generated transcript: {inner_e}")
@@ -67,7 +67,6 @@ def summarize_text_gpt(transcript, max_tokens=128):
     load_dotenv()
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-    max_tokens = min(max_tokens, len(transcript))
 
     try:
         response = client.chat.completions.create(
