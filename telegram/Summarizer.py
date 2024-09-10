@@ -115,12 +115,18 @@ def translate_text(text, src_lang='en', dest_lang='en'):
 
 
 def summarize_text_gpt(transcript, max_tokens=128):
-    system_msg = f'You are a model that receives a transcription of a YouTube video. Your task is to correct any words ' \
-                 'that may be incorrect based on the context, and transform it into a well-structured summary of the ' \
-                 'entire video. Your summary should highlight important details and provide additional context when ' \
-                 f'necessary. Aim to be detailed, particularly when addressing non-trivial aspects of the content. ' \
-                 f'The length of the sequence needs to be at most {max_tokens} tokens.'
-
+    # Adjust the system message based on the max_tokens value
+    if max_tokens <= 128:
+        system_msg = f'You are a model that receives a transcription of a YouTube video. ' \
+                     'Your task is to create a concise summary that highlights only the most ' \
+                     f'important points, keeping the summary very brief and well within {max_tokens} tokens.'
+    else:
+        system_msg = f'You are a model that receives a transcription of a YouTube video. Your task is to correct ' \
+                     'any words that may be incorrect based on the context, and transform it into a well-structured ' \
+                     'summary of the entire video. Your summary should highlight important details and provide ' \
+                     'additional context when necessary. Aim to be detailed, particularly when addressing non-trivial ' \
+                     f'aspects of the content. The length of the summary should not exceed {max_tokens} tokens.'
+            
     load_dotenv()
     client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
