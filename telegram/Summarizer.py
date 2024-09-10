@@ -42,7 +42,7 @@ def get_youtube_transcript(url):
         print("Attempting to fetch auto-generated transcript...")
         try:
             # Get available transcripts in any language
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id, proxies=proxies)
             # Attempt to find the first available auto-generated transcript
             for transcript_info in transcript_list:
                 if transcript_info.is_generated:
