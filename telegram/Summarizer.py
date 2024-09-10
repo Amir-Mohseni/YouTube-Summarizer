@@ -114,9 +114,9 @@ def translate_text(text, src_lang='en', dest_lang='en'):
         raise RuntimeError(f"Encountered error when translating the text")
 
 
-def summarize_text_gpt(transcript, max_tokens=128):
+def summarize_text_gpt(transcript, max_tokens):
     # Adjust the system message based on the max_tokens value
-    if max_tokens <= 128:
+    if max_tokens <= 256:
         system_msg = f'You are a model that receives a transcription of a YouTube video. ' \
                      'Your task is to create a concise summary that highlights only the most ' \
                      f'important points, keeping the summary very brief and well within {max_tokens} tokens.'
@@ -160,7 +160,7 @@ def summarize_yt_video(url, summary_type='medium', target_language='en'):
         if detected_lang != target_language:
             transcript = translate_text(transcript, src_lang=detected_lang, dest_lang=target_language)
 
-        length_dict = {'short': 128, 'medium': 256, 'long': 512, 'extra_long': 2048}
+        length_dict = {'short': 256, 'medium': 512, 'long': 1024, 'extra_long': 2048}
         max_tokens = length_dict[summary_type]
 
         summary = summarize_text_gpt(transcript, max_tokens=max_tokens)
